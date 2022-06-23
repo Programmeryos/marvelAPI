@@ -37,6 +37,11 @@ function CharList(props) {
         getResurses(offset);
         // eslint-disable-next-line
     }, []);
+    
+    useEffect(() => {
+        getResurses(offset);
+        // eslint-disable-next-line
+    }, [offset]);
 
     const onCharLoaded = (newData) => {
 
@@ -100,10 +105,7 @@ function CharList(props) {
                 </ul>
                 {!ended && 
                     <button className="button button__main button__long"
-                        onClick={() => {
-                            onChangeOffset(offset);
-                            getResurses(offset + 9)}
-                        }
+                        onClick={() => onChangeOffset(offset)}
                         disabled={loadingButton}>
                         <div className="inner">load more</div>
                     </button>
