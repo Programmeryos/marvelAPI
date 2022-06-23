@@ -1,84 +1,65 @@
-import { Component } from 'react/cjs/react.production.min';
+import { useState, useEffect } from 'react';
 
 import './charList.scss';
 import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/spinner';
 import ErrorMessange from '../errorMessange/errorMessange';
 
-class CharList extends Component {
-    state = {
-        data: [],
-        error: false,
-        loading: true,
-        offset: 210,
-        ended: false,
-        loadingButton: false,
-        total: 999999,
-    }
+function CharList(props) {
+    const [data, setData] = useState([]),
+        [error, setError] = useState(false),
+        [loading, setLoading] = useState(true),
+        [offset, setOffset] = useState(210),
+        [ended, setEnded] = useState(false),
+        [loadingButton, setLoadingButton] = useState(false),
+        [total, setTotal] = useState(999999);
 
-    marvelService = new MarvelService();
+    const marvelService = new MarvelService();
 
-    getTotalCurr = () => {
-        this.marvelService
+    const getTotalCurr = () => {
+        marvelService
             .getTotalCurr()
             .then(total => {
-                this.setState({total})
+                setTotal(total)
             })
     }
 
-    getResurses = (offset) => {
-        this.getTotalCurr()
+    const getResurses = (offset) => {
+        getTotalCurr()
 
-        this.marvelService
+        marvelService
             .getAllCharacters(offset)
-            .then(this.onCharLoaded)
-            .catch(this.onError)
+            .then(onCharLoaded)
+            .catch(onError)
     }
 
-    componentDidMount () {
-        
-        this.getResurses(this.state.offset);
-       
-    }
+    useEffect(() => {
+        getResurses(offset);
+        // eslint-disable-next-line
+    }, []);
 
-    componentDidUpdate(prevProps, prevState) {
-        if(this.state.offset !== prevState.offset) {
-            this.getResurses(this.state.offset);
+    const onCharLoaded = (newData) => {
+
+        setData([...data, ...newData]);
+        setLoading(false);
+        setLoadingButton(false);
+
+        if (offset >= (total - 9)) {
+            setEnded(true)
         }
 
     }
 
-    onCharLoaded = (data) => {
-        this.setState({
-            data: [...this.state.data, ...data],
-            loading: false,
-            loadingButton: false,
-        })
-
-        if (this.state.offset >= this.state.total - 9) {
-            this.setState({ended: true})
-        }
-
+    const onError = () => {
+        setLoading(false);
+        setError(true);
     }
 
-    onError = () => {
-        this.setState({
-            loading:false,
-            error: true
-        })
+    const onChangeOffset = (offset) => {
+        setOffset(offset + 9);
+        setLoadingButton(true);
     }
-
-    onChangeOffset = (offset) => {
-        this.setState({
-            offset: offset + 9,
-            loadingButton: true
-        })
-
-    }
-
-    render() {
         
-        const {data, loading, error} = this.state;
 
         const spinner = loading ? <Spinner/> : null;
         const errorMessange = error ? <ErrorMessange/> : null;
@@ -94,7 +75,7 @@ class CharList extends Component {
 
             let clazz = 'char__item';
 
-            if(this.props.charId === id) {
+            if(props.charId === id) {
                 clazz += ' char__item_selected';
             } else {
                 clazz = 'char__item';
@@ -103,7 +84,7 @@ class CharList extends Component {
             return(
                 <li className={clazz}
                     key={id}
-                    onClick={() => this.props.getCharId(id)}>
+                    onClick={() => props.getCharId(id)}>
                     <img src={thumbnail} alt={name} style={imgStyle}/>
                     <div className="char__name">{name}</div>
                 </li>
@@ -117,16 +98,18 @@ class CharList extends Component {
                 <ul className="char__grid">
                     {elements}
                 </ul>
-                {!this.state.ended && 
+                {!ended && 
                     <button className="button button__main button__long"
-                        onClick={() => this.onChangeOffset(this.state.offset)}
-                        disabled={this.state.loadingButton}>
+                        onClick={() => {
+                            onChangeOffset(offset);
+                            getResurses(offset + 9)}
+                        }
+                        disabled={loadingButton}>
                         <div className="inner">load more</div>
                     </button>
                 }
             </div>
         )
-    }
 }
 
 export default CharList;

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
@@ -6,78 +6,71 @@ import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/spinner';
 import ErrorMessange from '../errorMessange/errorMessange';
 
-class RandomChar extends Component{
-    state = {
-        char: {},
-        loading: true,
-        error: false
-    }
+function RandomChar (){
 
-    marvelService = new MarvelService();
+    const [char, setChar] = useState({}),
+        [loading, setLoading] = useState(true),
+        [error, setError] = useState(false);
 
-    getResurses = () => {
+    const marvelService = new MarvelService();
+
+    const getResurses = () => {
         const id = Math.floor(Math.random() * (1011205 - 1011005) + 1011005);
-        this.marvelService
+        marvelService
             .getCharacter(id)
             .then(char => {
-                this.setState({
-                    char,
-                    loading: false
-                })
+                setChar(char);
+                setLoading(false);
             })
-            .catch(this.errorMessange)
+            .catch(errorMessangeDefine)
     }
 
-    onLoading = () => {
-        this.setState({
-            loading:true,
-            error: false
-        })
+    const onLoading = () => {
+        setLoading(true);
+        setError(false)
 
-        this.getResurses();
+        getResurses();
     }
 
-    componentDidMount() {
-        this.getResurses();
+
+    useEffect(() => {
+        getResurses();
+        // eslint-disable-next-line
+    } ,[]);
+
+    const errorMessangeDefine = () => {
+        setLoading(false);
+        setError(true);
     }
 
-    errorMessange = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
-    }
 
-    render() {
-        const {char, loading, error} = this.state;
-
-        const errorMessange = error ? <ErrorMessange/> :null;
-        const spinner = loading ? <Spinner/> : null;
-        const content = (!loading && !error) ? <View charData={char}/> : null;
+    const errorMessange = error ? <ErrorMessange/> :null;
+    const spinner = loading ? <Spinner/> : null;
+    const content = (!loading && !error) ? <View charData={char}/> : null;
 
 
-        return (
-            
-            <div className="randomchar">
-                {errorMessange}
-                {spinner}
-                {content}
-                <div className="randomchar__static">
-                    <p className="randomchar__title">
-                        Random character for today!<br/>
-                        Do you want to get to know him better?
-                    </p>
-                    <p className="randomchar__title">
-                        Or choose another one
-                    </p>
-                    <button className="button button__main" onClick={this.onLoading}>
-                        <div className="inner">try it</div>
-                    </button>
-                    <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
-                </div>
+    return (
+        
+        <div className="randomchar">
+            {errorMessange}
+            {spinner}
+            {content}
+            <div className="randomchar__static">
+                <p className="randomchar__title">
+                    Random character for today!<br/>
+                    Do you want to get to know him better?
+                </p>
+                <p className="randomchar__title">
+                    Or choose another one
+                </p>
+                <button className="button button__main" onClick={() => onLoading()}>
+                    <div className="inner">try it</div>
+                </button>
+                <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
             </div>
-        )
-    }
+        </div>
+    )
+    
 }
 
 function View(props) {
