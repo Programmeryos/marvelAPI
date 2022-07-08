@@ -1,39 +1,34 @@
-import { useState } from 'react';
-import AppHeader from "../appHeader/AppHeader";
-import RandomChar from "../randomChar/RandomChar";
-import CharList from "../charList/CharList";
-import CharInfo from "../charInfo/CharInfo";
-import ErrorBoundaries from "../errorBoundaries/errorBoundaries";
+import { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Route, Routes  } from 'react-router-dom';
 
-import decoration from '../../resources/img/vision.png';
+import AppHeader from "../appHeader/AppHeader";
+import Spinner from '../spinner/spinner';
+
+const Page404 = lazy(()=> import('../pages/404')),
+    MainPage = lazy(()=> import('../pages/MainPage')),
+    ComicsPage = lazy(()=> import('../pages/ComicsPage')),
+    SingleComicsPage = lazy(()=> import('../pages/SingleComicsPage'));
+
 
 function App() {
-    const [charId, setCharId] = useState(null);
-    
-    const getCharId = (charId) => {
-        setCharId(charId);
-    }
-
     return (
-        <div className="app">
-            <AppHeader/>
-            <main>
-                <ErrorBoundaries>
-                    <RandomChar/>
-                </ErrorBoundaries>
-                <div className="char__content">
-                    <ErrorBoundaries>
-                        <CharList getCharId={getCharId}
-                            charId={charId}/>
-                    </ErrorBoundaries>
-                    <ErrorBoundaries>
-                        <CharInfo charId={charId}/>
-                    </ErrorBoundaries>
+        <Suspense fallback={<Spinner/>}>
+            <Router>
+                <div className="app">
+                    <AppHeader/>
+                    <main>
+                        <Routes>
+                            <Route path="/" element={<MainPage/>}/>
+                            <Route path="/comics" element={<ComicsPage/>}/>
+                            <Route path="/comics/:comicId" element={<SingleComicsPage/>}/>
+                            <Route path="*" element={<Page404/>}/>
+                        </Routes>
+                    </main>
                 </div>
-                <img className="bg-decoration" src={decoration} alt="vision"/>
-            </main>
-        </div>
+            </Router>
+        </Suspense>
     )
+        
 
 }
 

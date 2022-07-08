@@ -1,31 +1,25 @@
-class  MarvelService {
-    _apiBase = 'https://gateway.marvel.com:443/v1/public/';
-    _apiKey = 'apikey=f0698f9383f14a8a7ee5e5b997a93ebd';
-    _baseOffset = 210;
+import { useHttp } from "../components/hooks/http.hook";
 
-    getResurses = async (url) => {
-        let res = await fetch(url)
+const  useMarvelService = () => {
+    const {loading, request, error, clearError} = useHttp();
 
-        if (!res.ok) {
-            throw new Error (`Не фетчится: ${url}, статус: ${res.status}`)
-        }
+    const _apiBase = 'https://gateway.marvel.com:443/v1/public/';
+    const _apiKey = 'apikey=f0698f9383f14a8a7ee5e5b997a93ebd';
+    const _baseOffset = 210;
 
-        return await res.json();
-    }
-
-    getAllCharacters = async (offset = this._baseOffset) => {
-        const res = await this.getResurses(`${this._apiBase}characters?limit=9&offset=${offset}&${this._apiKey}`);
+    const getAllCharacters = async (offset = _baseOffset) => {
+        const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`);
         
-        return res.data.results.map(item => this._transformCharacter(item))
+        return res.data.results.map(item => _transformCharacter(item))
     }
 
-    getCharacter = async (id) => {
-        const res = await this.getResurses(`${this._apiBase}characters/${id}?${this._apiKey}`);
+    const getCharacter = async (id) => {
+        const res = await request(`${_apiBase}characters/${id}?${_apiKey}`);
 
-        return this._transformCharacter(res.data.results[0]);
+        return _transformCharacter(res.data.results[0]);
     }
 
-    _transformCharacter = (char) => {
+    const _transformCharacter = (char) => {
         if (!char.description) {
             char.description = 'Content not founded :p';
         } else if(char.description.length > 150){
@@ -47,11 +41,37 @@ class  MarvelService {
         }
     }
 
-    getTotalCurr = async () => {
-        const res = await this.getResurses(`${this._apiBase}characters?${this._apiKey}`);
+    const getTotalCurrent = async () => {
+        const res = await request(`${_apiBase}characters?${_apiKey}`);
 
         return res.data.total;
     }
+
+    const getAllComics = async (offset) => {
+        const res = await request(`${_apiBase}comics?limit=8&offset=${offset}&${_apiKey}`);
+
+        return res.data.results.map(comics => _transformComics(comics));
+    }
+
+    const getComic = async (id) => {
+        const res = await request(`${_apiBase}comics/${id}?${_apiKey}`);
+
+        return _transformComics(res.data.results[0]);
+    }
+
+    const _transformComics = (comics) => {
+        return {
+            id: comics.id,
+            title: comics.title,
+            thumbnail: comics.thumbnail.path + '.' + comics.thumbnail.extension,
+            price: comics.prices[0].price,
+            url: comics.urls.url,
+            pageCount: comics.pageCount,
+            description: comics.description || 'Description not founded'
+        }
+    }
+
+    return {loading, error, getAllCharacters, getCharacter, getTotalCurrent, clearError, getAllComics, getComic}
 }
 
-export default MarvelService;
+export default useMarvelService;

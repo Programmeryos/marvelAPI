@@ -2,46 +2,30 @@ import { useState, useEffect } from 'react';
 
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/spinner';
 import ErrorMessange from '../errorMessange/errorMessange';
 
 function RandomChar (){
 
-    const [char, setChar] = useState({}),
-        [loading, setLoading] = useState(true),
-        [error, setError] = useState(false);
-
-    const marvelService = new MarvelService();
+    const [char, setChar] = useState({});
+    const {loading, error, getCharacter, clearError} = useMarvelService();
 
     const getResurses = () => {
+        clearError();
+        
         const id = Math.floor(Math.random() * (1011205 - 1011005) + 1011005);
-        marvelService
-            .getCharacter(id)
+            getCharacter(id)
             .then(char => {
                 setChar(char);
-                setLoading(false);
             })
-            .catch(errorMessangeDefine)
     }
-
-    const onLoading = () => {
-        setLoading(true);
-        setError(false)
-
-        getResurses();
-    }
-
 
     useEffect(() => {
         getResurses();
         // eslint-disable-next-line
     } ,[]);
 
-    const errorMessangeDefine = () => {
-        setLoading(false);
-        setError(true);
-    }
 
 
     const errorMessange = error ? <ErrorMessange/> :null;
@@ -63,7 +47,7 @@ function RandomChar (){
                 <p className="randomchar__title">
                     Or choose another one
                 </p>
-                <button className="button button__main" onClick={() => onLoading()}>
+                <button className="button button__main" onClick={() => getResurses()}>
                     <div className="inner">try it</div>
                 </button>
                 <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>

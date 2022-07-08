@@ -1,0 +1,27 @@
+@import '../../style/variables.scss';
+
+.title {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 36px;
+    span {
+        color: $main-color;
+    }
+}
+
+.center{
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+
+.back {
+    padding: 0 10px;
+    border: 1px solid #000000;
+    background-color: #6e2323;
+    color: #fff;
+    transition: 1s all;
+    &:hover{
+        transform: translateY(-5px);
+    }
+}

@@ -1,40 +1,36 @@
 import { useState, useEffect } from 'react';
 
 import './charList.scss';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/spinner';
 import ErrorMessange from '../errorMessange/errorMessange';
 
 function CharList(props) {
     const [data, setData] = useState([]),
-        [error, setError] = useState(false),
-        [loading, setLoading] = useState(true),
         [offset, setOffset] = useState(210),
         [ended, setEnded] = useState(false),
         [loadingButton, setLoadingButton] = useState(false),
         [total, setTotal] = useState(999999);
 
-    const marvelService = new MarvelService();
+    const {loading, error, getAllCharacters, getTotalCurrent, clearError} = useMarvelService();
 
     const getTotalCurr = () => {
-        marvelService
-            .getTotalCurr()
+        getTotalCurrent()
             .then(total => {
                 setTotal(total)
             })
     }
 
     const getResurses = (offset) => {
-        getTotalCurr()
+        clearError();
 
-        marvelService
-            .getAllCharacters(offset)
+        getAllCharacters(offset)
             .then(onCharLoaded)
-            .catch(onError)
     }
 
     useEffect(() => {
         getResurses(offset);
+        getTotalCurr();
         // eslint-disable-next-line
     }, []);
     
@@ -46,7 +42,6 @@ function CharList(props) {
     const onCharLoaded = (newData) => {
 
         setData([...data, ...newData]);
-        setLoading(false);
         setLoadingButton(false);
 
         if (offset >= (total - 9)) {
@@ -55,10 +50,6 @@ function CharList(props) {
 
     }
 
-    const onError = () => {
-        setLoading(false);
-        setError(true);
-    }
 
     const onChangeOffset = (offset) => {
         setOffset(offset + 9);
