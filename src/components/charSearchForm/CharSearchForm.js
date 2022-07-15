@@ -27,8 +27,6 @@ function CharSearchForm() {
         setName(e.target.value)
     }
 
-    console.log(name, "render")
-
     return(
         <form className="char-search-form" onSubmit={getCharId}>
             <label>
