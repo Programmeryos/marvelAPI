@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import './charInfo.scss';
 import useMarvelService from '../../services/MarvelService';
+import CharSearchForm from '../charSearchForm/CharSearchForm';
 
 import Spinner from '../spinner/spinner';
 import ErrorMessange from '../errorMessange/errorMessange';
@@ -45,11 +46,13 @@ function CharInfo(props){
     const content = !(loading || error || !char) ? <View char={char}/> : null;
 
     return (
-        <div className="char__info">
-            {skeleton}
-            {content}
-            {errorMessange}
-            {spinner}
+        <div className='char__info__wrapper'>
+            <div className="char__info">
+                {skeleton}
+                {content}
+                {errorMessange}
+                {spinner}
+            </div>
         </div>
     )
 

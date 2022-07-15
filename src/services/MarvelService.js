@@ -71,7 +71,13 @@ const  useMarvelService = () => {
         }
     }
 
-    return {loading, error, getAllCharacters, getCharacter, getTotalCurrent, clearError, getAllComics, getComic}
+    const getCharacterIdByName = async (name) => {
+        const res = await request(`${_apiBase}characters?name=${name}&${_apiKey}`);
+
+        return res.data.results[0].id;
+    }
+
+    return {loading, error, getAllCharacters, getCharacter, getTotalCurrent, clearError, getAllComics, getComic, getCharacterIdByName}
 }
 
 export default useMarvelService;
