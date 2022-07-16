@@ -4,14 +4,12 @@ import './charInfo.scss';
 import useMarvelService from '../../services/MarvelService';
 import CharSearchForm from '../charSearchForm/CharSearchForm';
 
-import Spinner from '../spinner/spinner';
-import ErrorMessange from '../errorMessange/errorMessange';
-import Skeleton from '../skeleton/Skeleton';
+import setContent from '../../utils/setContent';
 
 function CharInfo(props){
     const [char, setChar] = useState(null);
 
-    const {loading, error, getCharacter, clearError} = useMarvelService();
+    const {getCharacter, clearError, process, setProcess} = useMarvelService();
 
     useEffect(() => {
         getResurses();
@@ -22,6 +20,9 @@ function CharInfo(props){
     //         this.getResurses();
     //     }
     // }
+    useEffect(() => {
+        setProcess('waiting')
+    }, []);
 
     const getResurses = () => {
         clearError();
@@ -30,36 +31,36 @@ function CharInfo(props){
             return;
         }
 
-
         getCharacter(charId)
             .then(onCharLoaded)
+            .then(()=> {setProcess('confirmed')})
     }
 
     const onCharLoaded = (char) => {
         setChar(char);
     }
 
-
-    const skeleton = char || loading || error ? null : <Skeleton/>;
-    const spinner = loading ? <Spinner/> : null;
-    const errorMessange = error ? <ErrorMessange/> : null;
-    const content = !(loading || error || !char) ? <View char={char}/> : null;
+    // const skeleton = char || loading || error ? null : <Skeleton/>;
+    // const spinner = loading ? <Spinner/> : null;
+    // const errorMessange = error ? <ErrorMessange/> : null;
+    // const content = !(loading || error || !char) ? <View char={char}/> : null;
 
     return (
         <div className='char__info__wrapper'>
             <div className="char__info">
-                {skeleton}
+                {/* {skeleton}
                 {content}
                 {errorMessange}
-                {spinner}
+                {spinner} */}
+                {setContent(process, View, char)}
             </div>
         </div>
     )
 
 }
 
-const View = ({char}) => {
-    const {name, description, thumbnail, homepage, wiki, comics} = char;
+const View = ({data}) => {
+    const {name, description, thumbnail, homepage, wiki, comics} = data;
 
     let imgStyle = {objectFit: 'cover'};
 

@@ -5,14 +5,35 @@ import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/spinner';
 import ErrorMessange from '../errorMessange/errorMessange';
 
+const setContent = (process, Component, newItemLoading) => {
+    switch(process) {
+        case 'waiting':
+            return <Spinner/>
+            break;
+        case 'loading':
+            return newItemLoading ? <Component/> : <Spinner/>
+            break;
+        case  'confirmed':
+            return <Component/>
+            break;
+        case 'error': 
+            return <errorMessange/>
+            break;
+        default:
+            throw new Error('Unexpected process state');
+    }
+}
+
+
 function CharList(props) {
     const [data, setData] = useState([]),
+        [newItemLoading, setnewItemLoading] = useState(true),
         [offset, setOffset] = useState(210),
         [ended, setEnded] = useState(false),
         [loadingButton, setLoadingButton] = useState(false),
         [total, setTotal] = useState(999999);
 
-    const {loading, error, getAllCharacters, getTotalCurrent, clearError} = useMarvelService();
+    const {getAllCharacters, getTotalCurrent, clearError, process, setProcess} = useMarvelService();
 
     const getTotalCurr = () => {
         getTotalCurrent()
@@ -21,15 +42,17 @@ function CharList(props) {
             })
     }
 
-    const getResurses = (offset) => {
+    const getResurses = (offset, initial) => {
         clearError();
+        initial ? setnewItemLoading(false) : setnewItemLoading(true);
 
         getAllCharacters(offset)
             .then(onCharLoaded)
+            .then(() => setProcess('confirmed'));
     }
 
     useEffect(() => {
-        getResurses(offset);
+        getResurses(offset, true);
         getTotalCurr();
         // eslint-disable-next-line
     }, []);
@@ -55,12 +78,10 @@ function CharList(props) {
         setOffset(offset + 9);
         setLoadingButton(true);
     }
-        
 
-        const spinner = loading ? <Spinner/> : null;
-        const errorMessange = error ? <ErrorMessange/> : null;
 
-        const elements = data.map(item => { 
+    const renderItems = (arr) => {
+        const elements = arr.map(item => { 
             const {id, name, thumbnail} = item;
 
             let imgStyle = {objectFit: 'cover'};
@@ -85,24 +106,28 @@ function CharList(props) {
                     <div className="char__name">{name}</div>
                 </li>
             )
+
         })
 
         return (
-            <div className="char__list">
-                {errorMessange}
-                {spinner}
-                <ul className="char__grid">
-                    {elements}
-                </ul>
-                {!ended && 
-                    <button className="button button__main button__long"
-                        onClick={() => onChangeOffset(offset)}
-                        disabled={loadingButton}>
-                        <div className="inner">load more</div>
-                    </button>
-                }
-            </div>
+            <ul className="char__grid">
+                {elements}
+            </ul>
         )
+    }
+
+    return (
+        <div className="char__list">
+            {setContent(process, () => renderItems(data), newItemLoading)}
+            {!ended && 
+                <button className="button button__main button__long"
+                    onClick={() => onChangeOffset(offset)}
+                    disabled={loadingButton}>
+                    <div className="inner">load more</div>
+                </button>
+            }
+        </div>
+    )
 }
 
 export default CharList;
