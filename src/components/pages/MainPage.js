@@ -35,7 +35,7 @@ function MainPage() {
                         charId={charId}/>
                 </ErrorBoundaries>
                 <ErrorBoundaries>
-                    <div>
+                    <div style={{position: 'sticky', top: '30px'}}>
                         <CharInfo charId={charId}/>
                         <ErrorBoundaries>
                             <CharSearchForm/>
@@ -43,7 +43,7 @@ function MainPage() {
                     </div>
                 </ErrorBoundaries>
             </div>
-            <img className="bg-decoration" src={decoration} alt="vision"/>
+            <img className="bg-decoration" style={{'zIndex': -1}} src={decoration} alt="vision"/>
         </>
     )
 }
